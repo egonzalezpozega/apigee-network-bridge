@@ -29,7 +29,7 @@ curl -H "Authorization: Bearer $token" https://apigee.googleapis.com/v1/organiza
 If you haven't done so already, use this script to configure Service Networking to peer with Apigee
 
 ```bash
-./setup-peering.sh $project-id
+./setup-peering.sh $PROJECTID
 ```
 
 ## Installation
