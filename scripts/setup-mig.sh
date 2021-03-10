@@ -84,7 +84,7 @@ if [ -z "$existingAutoscaling" ]; then
     exit 1
   fi
 else
-  echo "Autoscaling for instance group $mig_name ist already setup...skipping"
+  echo "Autoscaling for instance group $mig_name is already setup...skipping"
 fi
 
 # Defined Named Port
