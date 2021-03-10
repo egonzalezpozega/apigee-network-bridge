@@ -29,7 +29,7 @@ if [ -z "$existingInstanceTemplate" ]; then
     --tags=https-server,apigee-envoy-proxy,gke-apigee-proxy \
     --machine-type e2-micro --image-family ubuntu-minimal-1804-lts \
     --image-project ubuntu-os-cloud --boot-disk-size 10GB \
-    --preemptible --no-address --can-ip-forward \
+    --preemptible --can-ip-forward \
     --metadata=ENDPOINT=$3,startup-script='#!/bin/sh
   sudo su - 
 
