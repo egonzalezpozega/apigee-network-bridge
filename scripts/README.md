@@ -5,10 +5,12 @@ These instructions help setup a networking bridge to allow Google Cloud External
 ## Installation
 
 Setup some environment variables:
+
+```bash
 AUTH="Authorization: Bearer $(gcloud auth print-access-token)"
 PROJECTID=your-apigee-gcp-project-id
 REGION=your-gcp-region
-
+```
 
 APIGEE_INSTANCE_IP: Follow this steps to obtain the Apigee instance IP:
 
