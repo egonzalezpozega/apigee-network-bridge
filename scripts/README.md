@@ -12,7 +12,6 @@ PROJECTID=your-apigee-gcp-project-id
 REGION=your-gcp-region
 ```
 
-
 APIGEE_INSTANCE_IP: Follow this steps to obtain the Apigee instance IP:
 
 Get the list of instances:
