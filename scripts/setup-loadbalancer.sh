@@ -71,7 +71,7 @@ fi
 
 echo "Configure a health-check\n"
 # Create Health Check
-existingHC=$( gcloud compute health-checks list|grep 'hc-apigee-443'|awk '{print $1}')
+existingHC=$( gcloud compute health-checks list|grep 'hc-apigee-mig-443'|awk '{print $1}')
 if [ -z "$existingHC" ]; then
   gcloud compute health-checks create https hc-apigee-mig-443 \
       --project $project --port 443 --global \
@@ -91,7 +91,7 @@ existingHC=$( gcloud compute backend-services list|grep $backend_name|awk '{prin
 if [ -z "$existingHC" ]; then
   gcloud compute backend-services create $backend_name \
       --project $project --protocol HTTPS \
-      --health-checks hc-apigee-443 --port-name https \
+      --health-checks hc-apigee-mig-443 --port-name https \
       --timeout 60s --connection-draining-timeout 300s --global
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
