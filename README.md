@@ -6,7 +6,7 @@ This repo creates a network bridge between [Google Cloud Load Balancer](https://
 
 The Apigee service when provisioned in GCP, it is available as a private service (behind an internal load balancer). 
 
-<img src="./ngsaas-networking.png" align="center" height="400" width="400">
+<img src="./ngsaas-networking.png" align="center">
 
 This repo contains scripts that provisions a managed instance group with NAT rules to forward API requests from an external load balancer to Apigee's internal load balancer. 
 
