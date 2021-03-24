@@ -35,7 +35,7 @@ echo "Reserved IP: " $lb_ip
 # Create Firewall Rule to allow Load Balancer to access Envoy
 existingFWRules=$( gcloud compute firewall-rules list|grep 'k8s-allow-lb-to-apigee'|awk '{print $1}')
 if [ -z "$existingFWRules" ]; then
-  gcloud compute firewall-rules create k8s-allow-lb-to-apigee \
+  gcloud compute firewall-rules create k8s-allow-lb-to-apigee-mig \
       --description "Allow incoming from GLB on TCP port 443 to Apigee Proxy" \
       --project $project --network $vpc_name --allow=tcp:443 \
       --source-ranges=130.211.0.0/22,35.191.0.0/16 \
