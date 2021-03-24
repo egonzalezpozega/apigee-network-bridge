@@ -15,18 +15,18 @@
 
 project=$1
 region=$2
-backend_name=apigee-network-bridge-backend
+backend_name=apigee-envoy-backend
 
 echo "Deleting forwarding rule\n"
-gcloud compute forwarding-rules delete apigee-https-lb-rule --global
+gcloud compute forwarding-rules delete apigee-mig-https-lb-rule --global
 
 echo "Delete LB target https proxy\n"
 # Delete Load Balancing Target HTTPS Proxy
-gcloud compute target-https-proxies delete apigee-https-proxy
+gcloud compute target-https-proxies delete apigee-mig-https-proxy
 
 echo "Delete LB URL Map\n"
 # Create Load Balancing URL Map
-gcloud compute url-maps delete apigee-proxy-map
+gcloud compute url-maps delete apigee-mig-proxy-map
 
 echo "Delete backend service\n"
 # Create Backend Service
@@ -34,14 +34,14 @@ gcloud compute backend-services delete $backend_name --global
 
 echo "Delete Apigee health-check\n"
 # Create Health Check
-gcloud compute health-checks delete hc-apigee-443
+gcloud compute health-checks delete hc-apigee-mig-443
 
 echo "Delete Apigee cert\n"
 gcloud compute ssl-certificates delete apigee-ssl-cert
 
 echo "Delete firewall rule\n"
 # Create Firewall Rule to allow Load Balancer to access Envoy
-gcloud compute firewall-rules delete k8s-allow-lb-to-apigee
+gcloud compute firewall-rules delete k8s-allow-lb-to-apigee-mig
 
 echo "Delete reserved IP\n"
 # Delete reserved IP Address for Load Balancer
