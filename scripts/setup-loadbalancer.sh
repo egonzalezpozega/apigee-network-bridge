@@ -16,8 +16,8 @@
 project=$1
 region=$2
 vpc_name=$3
-backend_name=apigee-network-bridge-backend
-mig_name=apigee-network-bridge-$region-mig
+backend_name=apigee-envoy-backend
+mig_name=apigee-mig-$region
 
 # Reserve IP Address for Load Balancer
 existingIP=$( gcloud compute addresses list|grep 'lb-ipv4-vip-1'|awk '{print $1}')
@@ -60,7 +60,7 @@ existingHC=$( gcloud compute ssl-certificates list|grep 'apigee-ssl-cert'|awk '{
 if [ -z "$existingHC" ]; then
   # create key and cert pair
   openssl genrsa -out tls.key 2048
-  openssl req -x509 -new -nodes -key tls.key -subj "/CN=$project-eval.apigee-net" -days 3650 -out tls.crt
+  openssl req -x509 -new -nodes -key tls.key -subj "/CN=$project-eval.apigee.net" -days 3650 -out tls.crt
   gcloud compute ssl-certificates create apigee-ssl-cert \
       --project $project \
       --certificate=tls.crt \
@@ -73,7 +73,7 @@ echo "Configure a health-check\n"
 # Create Health Check
 existingHC=$( gcloud compute health-checks list|grep 'hc-apigee-443'|awk '{print $1}')
 if [ -z "$existingHC" ]; then
-  gcloud compute health-checks create https hc-apigee-443 \
+  gcloud compute health-checks create https hc-apigee-mig-443 \
       --project $project --port 443 --global \
       --request-path /healthz/ingress
   RESULT=$?
@@ -124,7 +124,7 @@ echo "Create LB URL Map\n"
 # Create Load Balancing URL Map
 existingURLMap=$( gcloud compute url-maps list|grep 'apigee-proxy-map'|awk '{print $1}')
 if [ -z "$existingURLMap" ]; then
-  gcloud compute url-maps create apigee-proxy-map \
+  gcloud compute url-maps create apigee-mig-proxy-map \
       --project $project --default-service $backend_name
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
@@ -139,8 +139,8 @@ echo "Create LB target https proxy\n"
 # Create Load Balancing Target HTTPS Proxy
 existingURLMap=$( gcloud compute target-https-proxies list|grep 'apigee-https-proxy'|awk '{print $1}')
 if [ -z "$existingURLMap" ]; then
-  gcloud compute target-https-proxies create apigee-https-proxy \
-      --project $project --url-map apigee-proxy-map \
+  gcloud compute target-https-proxies create apigee-mig-https-proxy \
+      --project $project --url-map apigee-mig-proxy-map \
       --ssl-certificates apigee-ssl-cert
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
@@ -155,9 +155,9 @@ echo "Create forwarding rule\n"
 # Create Global Forwarding Rule
 existingFWRules=$( gcloud compute forwarding-rules list|grep 'apigee-https-lb-rule'|awk '{print $1}')
 if [ -z "$existingURLMap" ]; then
-  gcloud compute forwarding-rules create apigee-https-lb-rule \
+  gcloud compute forwarding-rules create apigee-mig-https-lb-rule \
       --project $project --address lb-ipv4-vip-1 --global \
-      --target-https-proxy apigee-https-proxy --ports 443
+      --target-https-proxy apigee-mig-https-proxy --ports 443
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
     echo "failed to add forwarding rule"
@@ -167,4 +167,4 @@ else
   echo "Forwarding rule apigee-https-lb-rule already exists...skipping"
 fi
 
-echo "Load balancer setup complete. It can take up to 5 min for the loadbalancer to become available. You can try an api call as curl -kv https://$lb_ip/hello-world \n"
+echo "Load balancer setup complete. It can take up to 5 min for the loadbalancer to become available. You can try an api call as curl -k --resolve \""$project-eval.apigee.net:443:$lb_ip\"" 'https://$project-eval.apigee.net/hello-world' \n"
