@@ -18,7 +18,7 @@ region=$2
 endpoint=$3
 vpc_name=$4
 subnet_name=$5
-mig_name=apigee-network-bridge-$region-mig
+mig_name=apigee-mig-$region
 
 echo "Create GCE instance template\n"
 # create a template
@@ -26,24 +26,10 @@ existingInstanceTemplate=$( gcloud compute instance-templates list|grep $mig_nam
 if [ -z "$existingInstanceTemplate" ]; then
   gcloud compute instance-templates create $mig_name \
     --project $project --region $region --network $vpc_name --subnet $subnet_name \
-    --tags=https-server,apigee-envoy-proxy,gke-apigee-proxy \
-    --machine-type e2-micro --image-family ubuntu-minimal-1804-lts \
-    --image-project ubuntu-os-cloud --boot-disk-size 10GB \
-    --preemptible --can-ip-forward \
-    --metadata=ENDPOINT=$3,startup-script='#!/bin/sh
-  sudo su - 
-
-  endpoint=$(curl -s http://metadata.google.internal/computeMetadata/v1/instance/attributes/ENDPOINT -H "Metadata-Flavor: Google")
-
-  sysctl -w net.ipv4.ip_forward=1
-  sysctl -ew net.netfilter.nf_conntrack_buckets=1048576
-  sysctl -ew net.netfilter.nf_conntrack_max=8388608
-
-
-  iptables -t nat -A POSTROUTING -j MASQUERADE
-  iptables -t nat -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination $endpoint
-
-  exit 0'
+    --tags=https-server,apigee-mig-proxy,gke-apigee-proxy \
+    --machine-type e2-medium --image-family debian-10 \
+    --image-project debian-cloud --boot-disk-size 20GB \
+    --metadata=ENDPOINT=$endpoint,startup-script-url=gs://apigee-5g-saas/apigee-envoy-proxy-release/latest/conf/startup-script.sh
     
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
@@ -61,8 +47,8 @@ echo "Create GCE Managed Instance Group\n"
 existingInstanceGroup=$( gcloud compute instance-groups managed list|grep $mig_name|awk '{print $1}')
 if [ -z "$existingInstanceGroup" ]; then
   gcloud compute instance-groups managed create $mig_name \
-      --project $project --base-instance-name apigee-nw-bridge \
-      --size 1 --template $mig_name --region $region
+      --project $project --base-instance-name apigee-mig \
+      --size 2 --template $mig_name --region $region
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
     exit 1
@@ -77,7 +63,7 @@ echo "Create GCE auto-scaling\n"
 existingAutoscaling=$( gcloud compute instance-groups managed describe $mig_name --region $region|grep 'autoscaler'|awk '{print $1}')
 if [ -z "$existingAutoscaling" ]; then
   gcloud compute instance-groups managed set-autoscaling $mig_name \
-      --project $project --region $region --max-num-replicas 3 \
+      --project $project --region $region --max-num-replicas 20 \
       --target-cpu-utilization 0.75 --cool-down-period 90
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
