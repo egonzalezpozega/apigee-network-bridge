@@ -15,7 +15,7 @@
 
 project=$1
 region=$2
-mig_name=apigee-network-bridge-$region-mig
+mig_name=apigee-mig-$region
 
 echo "Deleting GCE Managed Instance Group\n"
 # Delete Instance Group
