@@ -33,6 +33,8 @@ fi
 echo "Project ID: " $project
 echo "VPC name: " $vpc_name
 
+gcloud config set project $project
+
 existingAddress=$( gcloud compute addresses list|grep 'google-svcs'|awk '{print $1}')
 if [ -z "$existingAddress" ]; then
 	gcloud compute addresses create google-svcs --global \
