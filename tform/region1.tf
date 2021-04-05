@@ -56,11 +56,11 @@ resource "google_compute_subnetwork" "default" {
 
 # Define a GCE Instance template for private VMs
 resource "google_compute_instance_template" "apigee-region1" {
-  name        = "${var.apigee_mig_prefix}${var.region1}"
+  name        = "${var.apigee_mig_prefix}-${var.region1}"
   description = "This template is used by Apigee to bridge the network from GCLB to the tenant project."
   region                   = var.region1
 
-  tags = ["apigee"]
+  tags = ["apigee","https-server","apigee-mig-proxy","gke-apigee-proxy"]
 
   machine_type         = var.gce_instance_type
   can_ip_forward       = true
@@ -89,8 +89,8 @@ resource "google_compute_instance_template" "apigee-region1" {
 }
 
 resource "google_compute_region_instance_group_manager" "apigee-region1" {
-  name               = "${var.apigee_mig_prefix}${var.region1}"
-  base_instance_name = "${var.apigee_mig_prefix}${var.region1}"
+  name               = "${var.apigee_mig_prefix}-${var.region1}"
+  base_instance_name = "${var.apigee_mig_prefix}-${var.region1}"
   region               = var.region1
 
   version {
@@ -100,13 +100,13 @@ resource "google_compute_region_instance_group_manager" "apigee-region1" {
   target_size        = var.gce_min_nodes
 
   named_port {
-    name = "${var.apigee_mig_prefix}-port"
+    name = "${var.apigee_mig_prefix}-${var.region1}"
     port = 443
   }
 }
 
 resource "google_compute_region_autoscaler" "apigee" {
-  name   = "${var.apigee_mig_prefix}${var.region1}"
+  name   = "${var.apigee_mig_prefix}-${var.region1}"
   region   = var.region1
   target = google_compute_region_instance_group_manager.apigee-region1.id
 

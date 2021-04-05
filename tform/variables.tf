@@ -26,7 +26,7 @@ variable "project" {
 
 variable "apigee_mig_prefix" {
   type        = string
-  default     = "apigee-"
+  default     = "apigee-mig"
   description = "Prefix for Apigee's Managed Instance Group Name"  
 }
 
@@ -72,13 +72,13 @@ variable "gce_max_nodes" {
 
 variable "gce_disk_size" {
   type        = number
-  default     = 25
+  default     = 20
   description = "Boot disk size for Kubernetes nodes"
 }
 
 variable "gce_instance_type" {
   type        = string
-  default     = "e2-micro"
+  default     = "e2-medium"
   description = "Instance type to use for the MIG."
 }
 

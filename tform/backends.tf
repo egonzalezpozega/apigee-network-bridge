@@ -17,8 +17,8 @@
 resource "google_compute_backend_service" "apigee" {
   provider      = google-beta   
 
-  name                            = "apigee-backend-service"
-  port_name                       = "${var.apigee_mig_prefix}-port"
+  name                            = "apigee-envoy-backend"
+  port_name                       = "https"
   health_checks                   = [google_compute_health_check.apigee-health-check.id]
   load_balancing_scheme           = "EXTERNAL"
   timeout_sec                     = 10

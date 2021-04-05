@@ -30,7 +30,7 @@ data "google_compute_image" "apigee_image" {
 
 # Obtain a public IP Address
 resource "google_compute_global_address" "apigee" {
-  name         = "apigee"
+  name         = "lb-ipv4-vip-1"
   description  = "The public IP where the Apigee APIs will be exposed"
   ip_version   = "IPV4"
   address_type = "EXTERNAL"
@@ -38,7 +38,7 @@ resource "google_compute_global_address" "apigee" {
 
 # Create Firewall Rule to allow Load Balancer to access Envoy
 resource "google_compute_firewall" "apigee" {
-  name        = "apigee"
+  name        = "k8s-allow-lb-to-apigee"
   description = "Allow incoming from GLB on TCP port 443 to Apigee Proxy"
 
   network     = var.gce_network
@@ -50,7 +50,7 @@ resource "google_compute_firewall" "apigee" {
     ports    = ["443"]
   }
 
-  target_tags = [ "apigee" ]
+  target_tags = [ "gke-apigee-proxy" ]
 }
 
 # Generate a private key
@@ -107,7 +107,7 @@ resource "google_compute_ssl_certificate" "apigee" {
 
 # Healthcheck Apigee endpoint
 resource "google_compute_health_check" "apigee-health-check" {
-  name = "apigee"
+  name = "hc-apigee-mig-443"
 
   https_health_check {
     port         = "443"
@@ -117,14 +117,14 @@ resource "google_compute_health_check" "apigee-health-check" {
 
 # Create URL Map
 resource "google_compute_url_map" "apigee" {
-  name = "apigee"
+  name = "apigee-mig-proxy-map"
   description = "Load Balancer for Apigee"
   default_service = google_compute_backend_service.apigee.id
 }
 
 # 
 resource "google_compute_target_https_proxy" "apigee" {
-  name             = "apigee"
+  name             = "apigee-mig-https-proxy"
   url_map          = google_compute_url_map.apigee.id
   ssl_certificates = [google_compute_ssl_certificate.apigee.id]
 }
@@ -132,7 +132,7 @@ resource "google_compute_target_https_proxy" "apigee" {
 # 
 resource "google_compute_global_forwarding_rule" "apigee" {
   provider   = google-beta
-  name       = "apigee"
+  name       = "apigee-mig-https-lb-rule"
   target     = google_compute_target_https_proxy.apigee.id
   port_range = "443"
   ip_address = google_compute_global_address.apigee.address
