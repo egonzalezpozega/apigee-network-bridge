@@ -90,12 +90,12 @@ variable "gce_image" {
 
 variable "gce_network" {
   type        = string
-  default     = "default"
+  default     = "apigee-eval-network"
   description = "The network to create GCE instances."
 }
 
 variable "gce_subnet" {
   type        = string
-  default     = "default"
+  default     = "apigee-subnet1"
   description = "The subnet to create GCE instances."
 }

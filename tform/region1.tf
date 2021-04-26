@@ -23,14 +23,14 @@ variable "region1" {
 
 variable "region1_cidr_range" {
   type        = string
-  default     = "10.138.0.0/20"
+  default     = "10.129.0.0/20"
   description = "Region's CIDR range'"
 }
 
 # Define the IP Address for Apigee's instance (https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/list)
 variable "apigee_region1_endpoint" {
   type        = string
-  default     = "10.5.0.2"
+  default     = "10.25.0.2"
   description = "Private IP Address where Apigee is provisioned"  
 }
 
@@ -53,6 +53,14 @@ resource "google_compute_subnetwork" "default" {
   network                  = var.gce_network
   private_ip_google_access = true
 }
+
+#Create VPC peering to Google's tenant project
+resource "google_compute_network_peering" "peering1" {
+  name         = "peering1"
+  network      = var.gce_network
+  peer_network = google_compute_network.other.id
+}
+
 
 # Define a GCE Instance template for private VMs
 resource "google_compute_instance_template" "apigee-region1" {

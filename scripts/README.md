@@ -1,6 +1,7 @@
-# Setup Apigee Network Bring using Scripts
+# Setup Apigee Network Bridge using Scripts
 
 These instructions help setup a networking bridge to allow Google Cloud External Load Balancers connect to the Apigee service.
+NOTE: For the latest documentation and details of every step, please check the latest documentation under https://cloud.google.com/apigee/docs/api-platform/get-started/install-cli#external
 
 ## Installation
 
